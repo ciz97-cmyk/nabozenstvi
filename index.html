@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náboženství – Přiřazovačka</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d14;
+    --surface: #16161f;
+    --card: #1e1e2e;
+    --text: #e8e4d9;
+    --muted: #7a7a8c;
+    --accent: #c9a84c;
+    --success: #4caf80;
+    --error: #e05c5c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    min-height: 100vh;
+    padding: 14px 14px 30px;
+    background-image: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.06) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 80%, rgba(26,107,60,0.06) 0%, transparent 60%);
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    font-size: clamp(1.1rem, 5vw, 1.6rem);
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 16px;
+  }
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.35;
+    transition: opacity 0.3s;
+  }
+  .step-item.active  { opacity: 1; }
+  .step-item.done    { opacity: 0.7; }
+  .step-dot {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .step-item.active .step-dot  { border-color: var(--accent); background: rgba(201,168,76,0.15); }
+  .step-item.done   .step-dot  { border-color: var(--success); background: rgba(76,175,128,0.15); }
+  .step-label {
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+    color: var(--muted);
+  }
+  .step-item.active .step-label { color: var(--accent); }
+  .step-item.done   .step-label { color: var(--success); }
+  .step-line {
+    width: 28px; height: 2px;
+    background: rgba(255,255,255,0.08);
+    margin-bottom: 18px;
+    flex-shrink: 0;
+  }
+  .step-line.done { background: var(--success); }
+
+  /* ROUND BANNER */
+  .round-banner {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 4px solid var(--accent);
+  }
+  .round-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .round-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .round-desc { font-size: 0.76rem; color: var(--muted); }
+
+  /* RELIGION BOXES */
+  .boxes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .drop-box {
+    border-radius: 14px;
+    padding: 10px 8px 10px;
+    min-height: 110px;
+    border: 2px dashed rgba(255,255,255,0.12);
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .drop-box.drag-over { border-color: var(--accent); background: rgba(201,168,76,0.08); transform: scale(1.02); }
+  .drop-box.correct   { border-color: var(--success); border-style: solid; }
+  .drop-box.wrong     { border-color: var(--error);   border-style: solid; animation: shake .35s; }
+
+  .drop-box[data-religion="islam"]    { background: rgba(26,107,60,0.15); border-color: rgba(26,107,60,0.35); }
+  .drop-box[data-religion="hinduism"] { background: rgba(184,74,0,0.15);  border-color: rgba(184,74,0,0.35); }
+  .drop-box[data-religion="judaism"]  { background: rgba(26,58,107,0.15); border-color: rgba(26,58,107,0.35); }
+  .drop-box[data-religion="buddhism"] { background: rgba(139,105,20,0.15);border-color: rgba(139,105,20,0.35); }
+
+  .box-svg-icon { width: 46px; height: 46px; margin-bottom: 5px; flex-shrink: 0; }
+  .placed-chip[data-category="concept"] { background: rgba(140,60,160,0.6); }
+  .box-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .box-title[data-religion="islam"]    { color: #4fc98a; }
+  .box-title[data-religion="hinduism"] { color: #e8884a; }
+  .box-title[data-religion="judaism"]  { color: #6a9be8; }
+  .box-title[data-religion="buddhism"] { color: #e8c84a; }
+
+  .placed-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* placed chip in box */
+  .placed-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 12px;
+    padding: 4px 9px;
+    font-size: 0.68rem;
+    color: #fff;
+    cursor: pointer;
+    animation: pop .22s ease;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .placed-chip[data-category="god"]    { background: rgba(90,90,200,0.6); }
+  .placed-chip[data-category="book"]   { background: rgba(160,80,20,0.7); }
+  .placed-chip[data-category="symbol"] { background: rgba(40,130,80,0.6); }
+
+  /* prev round summary badges */
+  .summary-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border-radius: 10px;
+    padding: 3px 7px;
+    font-size: 0.62rem;
+    opacity: 0.75;
+  }
+  .summary-badge.ok   { background: rgba(76,175,128,0.25); color: #4fc98a; border: 1px solid rgba(76,175,128,0.3); }
+  .summary-badge.fail { background: rgba(224,92,92,0.25);  color: #e05c5c; border: 1px solid rgba(224,92,92,0.3); }
+
+  /* CHIPS */
+  .chips-section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px 10px;
+  }
+  .chips-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 10px;
+    font-family: 'Cinzel', serif;
+  }
+  .chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-family: 'Lato', sans-serif;
+    color: var(--text);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  }
+  .chip:active  { cursor: grabbing; transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+  .chip.dragging { opacity: 0.35; }
+  .chip-icon { font-size: 1.05rem; flex-shrink: 0; }
+  .chip-text { display: flex; flex-direction: column; gap: 1px; }
+  .chip-desc { font-size: 0.62rem; color: var(--muted); line-height: 1.3; }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+    padding: 10px 22px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-next  { background: var(--accent); color: #111; font-weight: 700; }
+  .btn-reset { background: transparent; color: var(--muted); border: 1.5px solid rgba(255,255,255,0.15); color: var(--muted); }
+
+  /* RESULT */
+  .result-msg {
+    text-align: center;
+    font-size: 0.85rem;
+    margin-top: 10px;
+    min-height: 22px;
+  }
+  .result-msg.good { color: var(--success); }
+  .result-msg.bad  { color: var(--error); }
+
+  /* FINAL SCREEN */
+  .final-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 10px;
+    text-align: center;
+  }
+  .final-screen.visible { display: flex; }
+  .final-score {
+    font-family: 'Cinzel', serif;
+    font-size: 3rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .final-label { font-size: 0.8rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .final-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .final-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 10px 8px;
+    font-size: 0.72rem;
+  }
+  .final-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .final-card-title[data-religion="islam"]    { color: #4fc98a; }
+  .final-card-title[data-religion="hinduism"] { color: #e8884a; }
+  .final-card-title[data-religion="judaism"]  { color: #6a9be8; }
+  .final-card-title[data-religion="buddhism"] { color: #e8c84a; }
+  .final-item { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 0.7rem; }
+  .final-item .ok   { color: var(--success); }
+  .final-item .fail { color: var(--error); }
+
+  /* ANIMATIONS */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes slidein {
+    from { transform: translateY(12px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .slidein { animation: slidein .3s ease both; }
+
+  .confetti-piece {
+    position: fixed; width: 8px; height: 8px; border-radius: 2px;
+    pointer-events: none; z-index: 9999;
+    animation: confetti-fall 1.8s ease-in forwards;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>⛪ Náboženství světa</h1>
+<p class="subtitle">Přiřaď správné pojmy do každého náboženství</p>
+
+<!-- STEP INDICATOR -->
+<div class="steps" id="steps-bar">
+  <div class="step-item active" id="step-0">
+    <div class="step-dot">🙏</div>
+    <div class="step-label">Bůh</div>
+  </div>
+  <div class="step-line" id="line-0"></div>
+  <div class="step-item" id="step-1">
+    <div class="step-dot">📖</div>
+    <div class="step-label">Kniha</div>
+  </div>
+  <div class="step-line" id="line-1"></div>
+  <div class="step-item" id="step-2">
+    <div class="step-dot">✡</div>
+    <div class="step-label">Symbol</div>
+  </div>
+  <div class="step-line" id="line-2"></div>
+  <div class="step-item" id="step-3">
+    <div class="step-dot">💡</div>
+    <div class="step-label">Pojmy</div>
+  </div>
+</div>
+
+<!-- GAME AREA -->
+<div id="game-area">
+  <!-- ROUND BANNER -->
+  <div class="round-banner slidein" id="round-banner">
+    <div class="round-icon" id="round-icon">🕊</div>
+    <div>
+      <div class="round-title" id="round-title">Kolo 1: Bůh / Božstvo</div>
+      <div class="round-desc" id="round-desc">Přiřaď boha nebo božstvo ke správnému náboženství</div>
+    </div>
+  </div>
+
+  <!-- DROP BOXES -->
+  <div class="boxes-grid">
+
+    <!-- ISLÁM: půlměsíc + hvězda -->
+    <div class="drop-box" data-religion="islam" id="box-islam" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+      <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <mask id="m-crescent">
+            <rect width="60" height="60" fill="white"/>
+            <circle cx="30" cy="24" r="13" fill="black"/>
+          </mask>
+        </defs>
+        <circle cx="23" cy="28" r="16" fill="#4fc98a" mask="url(#m-crescent)"/>
+        <!-- 5-point star, computed: cx=44 cy=18 r=7 -->
+        <polygon points="44,11 45.6,16.1 51,16.1 46.7,19.2 48.2,24.4 44,21.2 39.8,24.4 41.3,19.2 37,16.1 42.4,16.1" fill="#4fc98a"/>
+      </svg>
+      <div class="box-title" data-religion="islam">Islám</div>
+      <div class="placed-chips" id="placed-islam"></div>
+    </div>
+
+    <!-- HINDUISMUS: OM jako velký čistý glyph -->
+    <div class="drop-box" data-religion="hinduism" id="box-hinduism" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+      <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <text x="30" y="44" text-anchor="middle"
+              font-family="'Noto Serif', 'Times New Roman', Georgia, serif"
+              font-size="42" font-weight="bold"
+              fill="#e8884a">ॐ</text>
+      </svg>
+      <div class="box-title" data-religion="hinduism">Hinduismus</div>
+      <div class="placed-chips" id="placed-hinduism"></div>
+    </div>
+
+    <!-- JUDAISMUS: Davidova hvězda – dva přesné rovnostranné trojúhelníky -->
+    <div class="drop-box" data-religion="judaism" id="box-judaism" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+      <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <!-- nahoru: vrchol=30,8  dolní základna y=44  polovina základny=18.7 -->
+        <polygon points="30,8 48.7,40 11.3,40"
+                 fill="#6a9be8" fill-opacity="0.22"
+                 stroke="#6a9be8" stroke-width="2.2" stroke-linejoin="round"/>
+        <!-- dolů: vrchol=30,52  horní základna y=20  polovina základny=18.7 -->
+        <polygon points="30,52 11.3,20 48.7,20"
+                 fill="#6a9be8" fill-opacity="0.22"
+                 stroke="#6a9be8" stroke-width="2.2" stroke-linejoin="round"/>
+      </svg>
+      <div class="box-title" data-religion="judaism">Judaismus</div>
+      <div class="placed-chips" id="placed-judaism"></div>
+    </div>
+
+    <!-- BUDDHISMUS: Dharmacakra – 8 paprsků, hub, outer rim -->
+    <div class="drop-box" data-religion="buddhism" id="box-buddhism" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+      <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <!-- Vnější kruh (rim) -->
+        <circle cx="30" cy="30" r="22" stroke="#e8c84a" stroke-width="2.5" fill="none"/>
+        <!-- Vnitřní hub -->
+        <circle cx="30" cy="30" r="4.5" stroke="#e8c84a" stroke-width="2.2" fill="none"/>
+        <!-- 8 paprsků (spokes) na správných úhlech: 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315° -->
+        <!-- 0° (nahoru) -->
+        <line x1="30" y1="10.5" x2="30" y2="23.5" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 45° (vpravo-nahoru) -->
+        <line x1="34.2" y1="15.8" x2="41.2" y2="22.8" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 90° (vpravo) -->
+        <line x1="49.5" y1="30" x2="36.5" y2="30" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 135° (vpravo-dolů) -->
+        <line x1="41.2" y1="37.2" x2="34.2" y2="44.2" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 180° (dolů) -->
+        <line x1="30" y1="49.5" x2="30" y2="36.5" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 225° (vlevo-dolů) -->
+        <line x1="25.8" y1="44.2" x2="18.8" y2="37.2" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 270° (vlevo) -->
+        <line x1="10.5" y1="30" x2="23.5" y2="30" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+        <!-- 315° (vlevo-nahoru) -->
+        <line x1="18.8" y1="22.8" x2="25.8" y2="15.8" stroke="#e8c84a" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div class="box-title" data-religion="buddhism">Buddhismus</div>
+      <div class="placed-chips" id="placed-buddhism"></div>
+    </div>
+
+  </div>
+
+  <!-- CHIPS -->
+  <div class="chips-section">
+    <div class="chips-label" id="chips-label">Přetáhni sem ↑</div>
+    <div class="chips-grid" id="chips-container"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-next" id="btn-next" onclick="checkRound()">✓ Potvrdit kolo</button>
+    <button class="btn btn-reset" onclick="resetGame()">↺ Začít znovu</button>
+  </div>
+  <div class="result-msg" id="result-msg"></div>
+</div>
+
+<!-- FINAL SCREEN -->
+<div class="final-screen" id="final-screen">
+  <div class="final-score" id="final-score">16/16</div>
+  <div class="final-label">Celkové skóre</div>
+  <div id="final-detail" class="final-grid"></div>
+  <div class="btn-row">
+    <button class="btn btn-next" onclick="resetGame()">↺ Hrát znovu</button>
+  </div>
+</div>
+
+<script>
+const ROUNDS = [
+  { category:'god',     icon:'🙏', title:'Kolo 1 – Bůh / Božstvo',     desc:'Přiřaď boha nebo božstvo ke správnému náboženství' },
+  { category:'book',    icon:'📖', title:'Kolo 2 – Posvátná kniha',     desc:'Přiřaď posvátný text ke správnému náboženství' },
+  { category:'symbol',  icon:'✡',  title:'Kolo 3 – Symbol',             desc:'Přiřaď náboženský symbol ke správnému náboženství' },
+  { category:'concept', icon:'💡', title:'Kolo 4 – Pojmy a tradice',    desc:'Přiřaď pojmy a tradice ke správnému náboženství' },
+];
+
+const DATA = [
+  { id:'g1', text:'Alláh',              icon:'', religion:'islam',    category:'god' },
+  { id:'g2', text:'Višnu / Brahma / Šiva', icon:'', religion:'hinduism', category:'god' },
+  { id:'g3', text:'Jahve (JHVH)',       icon:'', religion:'judaism',   category:'god' },
+  { id:'g4', text:'Buddha (učitel)',    icon:'', religion:'buddhism', category:'god' },
+  { id:'b1', text:'Korán',             icon:'📖', religion:'islam',    category:'book' },
+  { id:'b2', text:'Védy / Bhagavadgíta',icon:'📜', religion:'hinduism', category:'book' },
+  { id:'b3', text:'Tóra / Talmud',     icon:'📚', religion:'judaism',   category:'book' },
+  { id:'b4', text:'Tipitaka',          icon:'🗂', religion:'buddhism', category:'book' },
+  { id:'s1', text:'Půlměsíc a hvězda', icon:'☪️', religion:'islam',    category:'symbol' },
+  { id:'s2', text:'Óm (ॐ)',            icon:'🕉️', religion:'hinduism', category:'symbol' },
+  { id:'s3', text:'Davidova hvězda',   icon:'✡️', religion:'judaism',   category:'symbol' },
+  { id:'s4', text:'Dharmacakra (kolo)',icon:'☸️', religion:'buddhism', category:'symbol' },
+  { id:'c1', text:'Ramadán',          icon:'🌙', religion:'islam',    category:'concept', desc:'měsíc půstu a duchovní očisty' },
+  { id:'c2', text:'Karma',            icon:'⚖️', religion:'hinduism', category:'concept', desc:'princip, že každé jednání má své důsledky' },
+  { id:'c3', text:'Menora',           icon:'🕎', religion:'judaism',   category:'concept', desc:'tradiční sedmicípý svícen, připomíná zázrak světla' },
+  { id:'c4', text:'Meditace',         icon:'🧘', religion:'buddhism', category:'concept', desc:'cvičení mysli pro klid a osvícení' },
+];
+
+const RELIGIONS = ['islam','hinduism','judaism','buddhism'];
+
+let currentRound = 0;
+let placements = {};    // id -> religion (current round)
+let results = {};       // id -> true/false (after check)
+let allResults = {};    // id -> true/false (all rounds)
+let roundLocked = false;
+let dragId = null;
+let touchChip = null;
+let touchClone = null;
+
+function currentItems() {
+  return DATA.filter(d => d.category === ROUNDS[currentRound].category);
+}
+
+function startRound() {
+  roundLocked = false;
+  placements = {};
+  const r = ROUNDS[currentRound];
+
+  // update banner
+  document.getElementById('round-icon').textContent = r.icon;
+  document.getElementById('round-title').textContent = r.title;
+  document.getElementById('round-desc').textContent  = r.desc;
+  document.getElementById('btn-next').textContent = currentRound < ROUNDS.length - 1 ? '✓ Potvrdit kolo' : '✓ Dokončit';
+
+  // update step indicator
+  ROUNDS.forEach((_, i) => {
+    const el = document.getElementById('step-' + i);
+    el.classList.remove('active','done');
+    if (i < currentRound)  el.classList.add('done');
+    if (i === currentRound) el.classList.add('active');
+    if (i < ROUNDS.length - 1) {
+      const line = document.getElementById('line-' + i);
+      line.classList.toggle('done', i < currentRound);
+    }
+  });
+
+  renderBoxes();
+  renderChips();
+  clearResult();
+
+  // animate banner
+  const banner = document.getElementById('round-banner');
+  banner.classList.remove('slidein');
+  void banner.offsetWidth;
+  banner.classList.add('slidein');
+}
+
+function renderBoxes() {
+  RELIGIONS.forEach(rel => {
+    const container = document.getElementById('placed-' + rel);
+    container.innerHTML = '';
+    // show previous round results as small badges
+    DATA.filter(d => allResults[d.id] !== undefined && d.religion === rel).forEach(item => {
+      const badge = document.createElement('div');
+      badge.className = 'summary-badge ' + (allResults[item.id] ? 'ok' : 'fail');
+      badge.innerHTML = item.icon + ' ' + item.text.split('/')[0].trim();
+      container.appendChild(badge);
+    });
+  });
+}
+
+function renderChips() {
+  const container = document.getElementById('chips-container');
+  container.innerHTML = '';
+  const items = currentItems().filter(d => !placements[d.id]);
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'chip';
+    div.id = 'chip-' + item.id;
+    div.draggable = true;
+    div.dataset.id = item.id;
+    div.innerHTML = `<span class="chip-icon">${item.icon}</span><span class="chip-text">${item.text}${item.desc ? `<span class="chip-desc">${item.desc}</span>` : ''}</span>`;
+    div.addEventListener('dragstart', () => { dragId = item.id; div.classList.add('dragging'); });
+    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    div.addEventListener('touchstart', touchStart, { passive: false });
+    container.appendChild(div);
+  });
+  // placed chips in boxes (current round)
+  RELIGIONS.forEach(rel => {
+    const container = document.getElementById('placed-' + rel);
+    // clear only current-round placed chips (keep badges)
+    [...container.querySelectorAll('.placed-chip')].forEach(e => e.remove());
+    currentItems().filter(d => placements[d.id] === rel).forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'placed-chip';
+      el.dataset.category = item.category;
+      el.innerHTML = `${item.icon} ${item.text} ✕`;
+      if (!roundLocked) el.addEventListener('click', () => removePlaced(item.id));
+      container.appendChild(el);
+    });
+  });
+}
+
+function removePlaced(id) {
+  if (roundLocked) return;
+  delete placements[id];
+  renderChips();
+  clearResult();
+}
+
+// DRAG desktop
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dropChip(e) {
+  e.preventDefault();
+  if (roundLocked) return;
+  const box = e.currentTarget;
+  box.classList.remove('drag-over');
+  if (!dragId) return;
+  // only one chip per box per round
+  const existingInBox = currentItems().find(d => placements[d.id] === box.dataset.religion);
+  if (existingInBox) delete placements[existingInBox.id];
+  placements[dragId] = box.dataset.religion;
+  dragId = null;
+  renderChips();
+  clearResult();
+}
+
+// TOUCH
+function touchStart(e) {
+  e.preventDefault();
+  const chip = e.currentTarget;
+  touchChip = chip;
+  const rect = chip.getBoundingClientRect();
+  touchClone = chip.cloneNode(true);
+  touchClone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;z-index:9000;pointer-events:none;opacity:0.92;transform:scale(1.06);transition:none;`;
+  document.body.appendChild(touchClone);
+  chip.style.opacity = '0.25';
+  document.addEventListener('touchmove', touchMove, { passive: false });
+  document.addEventListener('touchend', touchEnd);
+}
+function touchMove(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  if (touchClone) { touchClone.style.left = (t.clientX - 55) + 'px'; touchClone.style.top = (t.clientY - 22) + 'px'; }
+  document.querySelectorAll('.drop-box').forEach(b => b.classList.remove('drag-over'));
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const box = el && el.closest('.drop-box');
+  if (box) box.classList.add('drag-over');
+}
+function touchEnd(e) {
+  document.removeEventListener('touchmove', touchMove);
+  document.removeEventListener('touchend', touchEnd);
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  if (touchChip) touchChip.style.opacity = '';
+  if (roundLocked) { touchChip = null; return; }
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const box = el && el.closest('.drop-box');
+  document.querySelectorAll('.drop-box').forEach(b => b.classList.remove('drag-over'));
+  if (box && touchChip) {
+    const id = touchChip.dataset.id;
+    const existingInBox = currentItems().find(d => placements[d.id] === box.dataset.religion);
+    if (existingInBox) delete placements[existingInBox.id];
+    placements[id] = box.dataset.religion;
+    renderChips();
+    clearResult();
+  }
+  touchChip = null;
+}
+
+function checkRound() {
+  const items = currentItems();
+  const placed = items.filter(d => placements[d.id]);
+  if (placed.length < items.length) {
+    const msg = document.getElementById('result-msg');
+    msg.textContent = `Přiřaď všechny ${items.length} pojmy před potvrzením!`;
+    msg.className = 'result-msg bad';
+    return;
+  }
+
+  roundLocked = true;
+  let correct = 0;
+  items.forEach(item => {
+    const ok = placements[item.id] === item.religion;
+    allResults[item.id] = ok;
+    if (ok) correct++;
+    // flash box
+    const box = document.getElementById('box-' + item.religion);
+    const box2 = document.getElementById('box-' + placements[item.id]);
+    box2.classList.add(ok ? 'correct' : 'wrong');
+    setTimeout(() => { box2.classList.remove('correct','wrong'); }, 1100);
+  });
+
+  const msg = document.getElementById('result-msg');
+  if (correct === items.length) {
+    msg.textContent = `✓ Výborně! Všechny ${correct} správně!`;
+    msg.className = 'result-msg good';
+  } else {
+    msg.textContent = `${correct} z ${items.length} správně`;
+    msg.className = 'result-msg bad';
+  }
+
+  // change button
+  setTimeout(() => {
+    if (currentRound < ROUNDS.length - 1) {
+      const btn = document.getElementById('btn-next');
+      btn.textContent = '→ Další kolo';
+      btn.onclick = nextRound;
+    } else {
+      const btn = document.getElementById('btn-next');
+      btn.textContent = '🏁 Zobrazit výsledky';
+      btn.onclick = showFinal;
+    }
+  }, 400);
+}
+
+function nextRound() {
+  currentRound++;
+  document.getElementById('btn-next').onclick = checkRound;
+  startRound();
+}
+
+function showFinal() {
+  document.getElementById('game-area').style.display = 'none';
+  const fs = document.getElementById('final-screen');
+  fs.classList.add('visible');
+
+  const total = DATA.length;
+  const correct = Object.values(allResults).filter(Boolean).length;
+  document.getElementById('final-score').textContent = correct + '/' + total;
+
+  // summary grid
+  const grid = document.getElementById('final-detail');
+  grid.innerHTML = '';
+  RELIGIONS.forEach(rel => {
+    const card = document.createElement('div');
+    card.className = 'final-card';
+    const relName = { islam:'Islám', hinduism:'Hinduismus', judaism:'Judaismus', buddhism:'Buddhismus' }[rel];
+    card.innerHTML = `<div class="final-card-title" data-religion="${rel}">${relName}</div>`;
+    DATA.filter(d => d.religion === rel).forEach(item => {
+      const ok = allResults[item.id];
+      const row = document.createElement('div');
+      row.className = 'final-item';
+      row.innerHTML = `<span class="${ok ? 'ok' : 'fail'}">${ok ? '✓' : '✗'}</span> ${item.icon} ${item.text}`;
+      card.appendChild(row);
+    });
+    grid.appendChild(card);
+  });
+
+  if (correct === total) confetti();
+}
+
+function clearResult() {
+  const msg = document.getElementById('result-msg');
+  msg.textContent = '';
+  msg.className = 'result-msg';
+}
+
+function resetGame() {
+  currentRound = 0;
+  placements = {};
+  allResults = {};
+  roundLocked = false;
+  document.getElementById('game-area').style.display = '';
+  document.getElementById('final-screen').classList.remove('visible');
+  document.getElementById('btn-next').onclick = checkRound;
+  startRound();
+}
+
+function confetti() {
+  const colors = ['#c9a84c','#4fc98a','#e8884a','#6a9be8','#e8c84a','#e05c5c'];
+  for (let i = 0; i < 70; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-10px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (1.2 + Math.random()) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }, i * 25);
+  }
+}
+
+startRound();
+</script>
+</body>
+</html>
