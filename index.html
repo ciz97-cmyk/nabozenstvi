@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náboženství – Přiřazovačka</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07070e;
+    --surface: #0f0f1c;
+    --card: #141424;
+    --card2: #191930;
+    --text: #ede8dd;
+    --muted: #5a5a72;
+    --muted2: #8080a0;
+    --accent: #c9a84c;
+    --accent2: #e8cc80;
+    --accent-glow: rgba(201,168,76,0.22);
+    --success: #52d18c;
+    --error: #e06060;
+    --islam: #52d18c;
+    --hinduism: #f09050;
+    --judaism: #7aabf0;
+    --buddhism: #f0d050;
+    --islam-bg: rgba(30,110,65,0.15);
+    --hinduism-bg: rgba(180,70,0,0.15);
+    --judaism-bg: rgba(20,55,130,0.15);
+    --buddhism-bg: rgba(130,100,10,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    padding: 0 0 60px;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 5%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 90% 90%, rgba(82,209,140,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(122,171,240,0.02) 0%, transparent 100%);
+  }
+
+  /* ORNAMENTAL HEADER */
+  .header-wrap {
+    text-align: center;
+    padding: 36px 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(201,168,76,0.06) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .ornament-line {
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent));
+  }
+  .ornament-line.right { background: linear-gradient(90deg, var(--accent), transparent); }
+  .ornament-diamond {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+  .header-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.52rem;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 6vw, 2.1rem);
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 4px;
+    line-height: 1.15;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 1rem;
+    color: var(--muted2);
+    font-style: italic;
+    letter-spacing: 0.3px;
+  }
+  .ornament-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+    opacity: 0.3;
+  }
+  .ornament-dot { width: 3px; height: 3px; background: var(--accent); border-radius: 50%; }
+  .ornament-dot.big { width: 5px; height: 5px; }
+
+  /* WRAPPER */
+  .game-wrapper {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 14px;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 22px;
+    gap: 0;
+    padding: 14px 0;
+    position: relative;
+  }
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.25;
+    transition: opacity 0.4s;
+    cursor: default;
+  }
+  .step-item.active { opacity: 1; }
+  .step-item.done   { opacity: 0.6; }
+  .step-dot {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem;
+    transition: all 0.4s;
+    position: relative;
+  }
+  .step-item.active .step-dot {
+    border-color: var(--accent);
+    background: rgba(201,168,76,0.12);
+  }
+  .step-item.done .step-dot {
+    border-color: var(--success);
+    background: rgba(82,209,140,0.1);
+  }
+  .step-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.52rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.4s;
+  }
+  .step-item.active .step-label { color: var(--accent); }
+  .step-item.done   .step-label { color: var(--success); }
+  .step-line {
+    width: 28px; height: 1.5px;
+    background: rgba(255,255,255,0.06);
+    margin-bottom: 24px;
+    flex-shrink: 0;
+    border-radius: 1px;
+    transition: background 0.6s;
+  }
+  .step-line.done { background: linear-gradient(90deg, var(--success), rgba(82,209,140,0.3)); }
+
+  /* ROUND BANNER */
+  .round-banner {
+    border-radius: 18px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.02) 100%);
+    border: 1px solid rgba(201,168,76,0.18);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .round-banner::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent2), var(--accent), transparent);
+    border-radius: 3px 0 0 3px;
+  }
+  .round-icon { font-size: 2rem; flex-shrink: 0; }
+  .round-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+    letter-spacing: 0.8px;
+  }
+  .round-desc {
+    font-size: 0.85rem;
+    color: var(--muted2);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /* DROP BOXES GRID */
+  .boxes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .drop-box {
+    border-radius: 18px;
+    padding: 14px 10px 12px;
+    min-height: 130px;
+    border: 1.5px dashed rgba(255,255,255,0.08);
+    transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+  .drop-box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .drop-box.drag-over {
+    border-style: solid !important;
+    border-color: var(--accent) !important;
+    transform: scale(1.025);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .drop-box.correct {
+    border-style: solid !important;
+    border-color: var(--success) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .drop-box.wrong {
+    border-style: solid !important;
+    border-color: var(--error) !important;
+    animation: shake .4s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .drop-box[data-religion="islam"] {
+    background: linear-gradient(160deg, rgba(20,85,50,0.28) 0%, rgba(8,30,18,0.1) 100%);
+    border-color: rgba(82,209,140,0.28);
+  }
+  .drop-box[data-religion="hinduism"] {
+    background: linear-gradient(160deg, rgba(170,65,0,0.28) 0%, rgba(80,28,0,0.1) 100%);
+    border-color: rgba(240,144,80,0.28);
+  }
+  .drop-box[data-religion="judaism"] {
+    background: linear-gradient(160deg, rgba(20,55,135,0.28) 0%, rgba(8,22,70,0.1) 100%);
+    border-color: rgba(122,171,240,0.28);
+  }
+  .drop-box[data-religion="buddhism"] {
+    background: linear-gradient(160deg, rgba(120,90,8,0.28) 0%, rgba(60,46,0,0.1) 100%);
+    border-color: rgba(240,208,80,0.28);
+  }
+
+  /* Colored top accent bar per religion */
+  .drop-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 18px 18px 0 0;
+    pointer-events: none;
+  }
+  .drop-box[data-religion="islam"]::before    { background: linear-gradient(90deg, var(--islam), transparent); }
+  .drop-box[data-religion="hinduism"]::before { background: linear-gradient(90deg, var(--hinduism), transparent); }
+  .drop-box[data-religion="judaism"]::before  { background: linear-gradient(90deg, var(--judaism), transparent); }
+  .drop-box[data-religion="buddhism"]::before { background: linear-gradient(90deg, var(--buddhism), transparent); }
+
+  .box-svg-icon {
+    width: 48px; height: 48px;
+    margin: 0 auto 7px;
+    flex-shrink: 0;
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+  .box-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 9px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+  .box-title[data-religion="islam"]    { color: var(--islam); }
+  .box-title[data-religion="hinduism"] { color: var(--hinduism); }
+  .box-title[data-religion="judaism"]  { color: var(--judaism); }
+  .box-title[data-religion="buddhism"] { color: var(--buddhism); }
+
+  .placed-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .placed-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 10px;
+    padding: 4px 9px;
+    font-size: 0.68rem;
+    font-family: 'Crimson Pro', serif;
+    color: rgba(255,255,255,0.92);
+    cursor: pointer;
+    animation: pop .22s cubic-bezier(.34,1.56,.64,1);
+    word-break: break-word;
+    max-width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(6px);
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .placed-chip:hover { opacity: 0.75; transform: scale(0.97); }
+  .placed-chip[data-category="god"]     { background: rgba(80,80,190,0.5); }
+  .placed-chip[data-category="book"]    { background: rgba(140,70,15,0.6); }
+  .placed-chip[data-category="symbol"]  { background: rgba(30,110,70,0.5); }
+  .placed-chip[data-category="concept"] { background: rgba(120,50,140,0.5); }
+
+  .summary-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 0.6rem;
+    font-family: 'Crimson Pro', serif;
+    opacity: 0.82;
+    backdrop-filter: blur(4px);
+  }
+  .summary-badge.ok   { background: rgba(82,209,140,0.18); color: var(--success); border: 1px solid rgba(82,209,140,0.22); }
+  .summary-badge.fail { background: rgba(224,96,96,0.18);  color: var(--error);   border: 1px solid rgba(224,96,96,0.22); }
+
+  /* CHIPS */
+  .chips-section {
+    background: linear-gradient(180deg, var(--card2) 0%, var(--card) 100%);
+    border-radius: 20px;
+    padding: 16px 12px 18px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 28px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+    position: relative;
+    overflow: hidden;
+  }
+  .chips-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+  }
+  .chips-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    justify-content: center;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--card2) 0%, var(--card) 100%);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    font-family: 'Crimson Pro', serif;
+    color: var(--text);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .chip:hover {
+    border-color: rgba(201,168,76,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  }
+  .chip:active { cursor: grabbing; transform: scale(1.07) translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .chip.dragging { opacity: 0.25; transform: scale(0.94); }
+  .chip-icon { font-size: 1.15rem; flex-shrink: 0; line-height: 1; }
+  .chip-text { display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+  .chip-desc { font-size: 0.65rem; color: var(--muted2); font-style: italic; line-height: 1.3; text-align: center; }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    padding: 12px 28px;
+    border-radius: 32px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-transform: uppercase;
+  }
+  .btn:active { transform: scale(0.96) !important; }
+  .btn-next {
+    background: linear-gradient(135deg, #dfc05a 0%, #c9a84c 50%, #b8963a 100%);
+    color: #1a1000;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25);
+    letter-spacing: 1.5px;
+  }
+  .btn-next:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.35); transform: translateY(-1px); }
+  .btn-reset {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    letter-spacing: 2px;
+  }
+  .btn-reset:hover { border-color: rgba(255,255,255,0.2); color: var(--muted2); }
+
+  /* RESULT */
+  .result-msg {
+    text-align: center;
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 12px;
+    min-height: 24px;
+    transition: opacity 0.3s;
+    letter-spacing: 0.3px;
+  }
+  .result-msg.good { color: var(--success); }
+  .result-msg.bad  { color: var(--error); }
+
+  /* FINAL SCREEN */
+  .final-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 32px 16px 16px;
+    text-align: center;
+    animation: fadein 0.55s ease;
+  }
+  .final-screen.visible { display: flex; }
+
+  .final-trophy {
+    font-size: 3.5rem;
+    animation: trophy-pop 0.65s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes trophy-pop {
+    from { transform: scale(0) rotate(-20deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .final-score-wrap {
+    background: linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(201,168,76,0.03) 100%);
+    border: 1px solid rgba(201,168,76,0.22);
+    border-radius: 22px;
+    padding: 20px 40px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .final-score-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 25%; right: 25%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+  }
+  .final-score {
+    font-family: 'Cinzel', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .final-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--muted2);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 5px;
+  }
+  .final-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-top: 4px;
+  }
+  .final-card {
+    background: var(--card);
+    border-radius: 15px;
+    padding: 12px 10px;
+    font-size: 0.78rem;
+    font-family: 'Crimson Pro', serif;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+  }
+  .final-card[data-religion="islam"]::before    { background: linear-gradient(90deg, var(--islam), transparent); }
+  .final-card[data-religion="hinduism"]::before { background: linear-gradient(90deg, var(--hinduism), transparent); }
+  .final-card[data-religion="judaism"]::before  { background: linear-gradient(90deg, var(--judaism), transparent); }
+  .final-card[data-religion="buddhism"]::before { background: linear-gradient(90deg, var(--buddhism), transparent); }
+  .final-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    margin-bottom: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-bottom: 7px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .final-card-title[data-religion="islam"]    { color: var(--islam); }
+  .final-card-title[data-religion="hinduism"] { color: var(--hinduism); }
+  .final-card-title[data-religion="judaism"]  { color: var(--judaism); }
+  .final-card-title[data-religion="buddhism"] { color: var(--buddhism); }
+  .final-item { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 5px; font-size: 0.75rem; line-height: 1.4; }
+  .final-item .ok   { color: var(--success); font-size: 0.85rem; flex-shrink: 0; }
+  .final-item .fail { color: var(--error);   font-size: 0.85rem; flex-shrink: 0; }
+
+  /* ANIMATIONS */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  @keyframes pop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    65%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes slidein {
+    from { transform: translateY(18px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .slidein { animation: slidein .4s cubic-bezier(.22,1,.36,1) both; }
+
+  .confetti-piece {
+    position: fixed; width: 9px; height: 9px;
+    pointer-events: none; z-index: 9999;
+    animation: confetti-fall 2s ease-in forwards;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    80%  { opacity: 0.7; }
+    100% { transform: translateY(105vh) rotate(800deg) scale(0.6); opacity: 0; }
+  }
+
+  /* divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    margin: 14px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header-wrap">
+  <div class="ornament">
+    <div class="ornament-line"></div>
+    <div class="ornament-diamond"></div>
+    <div class="ornament-line right"></div>
+  </div>
+  <div class="header-eyebrow">Vzdělávací hra</div>
+  <h1>Náboženství světa</h1>
+  <p class="subtitle">Přiřaď správné pojmy ke každému náboženství</p>
+  <div class="ornament-bottom">
+    <div class="ornament-dot"></div>
+    <div class="ornament-dot big"></div>
+    <div class="ornament-dot"></div>
+  </div>
+</div>
+
+<div class="game-wrapper">
+
+  <!-- STEP INDICATOR -->
+  <div class="steps" id="steps-bar">
+    <div class="step-item active" id="step-0">
+      <div class="step-dot">🙏</div>
+      <div class="step-label">Bůh</div>
+    </div>
+    <div class="step-line" id="line-0"></div>
+    <div class="step-item" id="step-1">
+      <div class="step-dot">📖</div>
+      <div class="step-label">Kniha</div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-item" id="step-2">
+      <div class="step-dot">✡</div>
+      <div class="step-label">Symbol</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-item" id="step-3">
+      <div class="step-dot">💡</div>
+      <div class="step-label">Pojmy</div>
+    </div>
+  </div>
+
+  <!-- GAME AREA -->
+  <div id="game-area">
+
+    <!-- ROUND BANNER -->
+    <div class="round-banner slidein" id="round-banner">
+      <div class="round-icon" id="round-icon">🙏</div>
+      <div>
+        <div class="round-title" id="round-title">Kolo 1 – Bůh / Božstvo</div>
+        <div class="round-desc" id="round-desc">Přiřaď boha nebo božstvo ke správnému náboženství</div>
+      </div>
+    </div>
+
+    <!-- DROP BOXES -->
+    <div class="boxes-grid">
+
+      <!-- ISLÁM -->
+      <div class="drop-box" data-religion="islam" id="box-islam"
+           ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+        <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <mask id="m-crescent">
+              <rect width="60" height="60" fill="white"/>
+              <circle cx="31" cy="24" r="13.5" fill="black"/>
+            </mask>
+          </defs>
+          <circle cx="24" cy="28" r="17" fill="#52d18c" mask="url(#m-crescent)"/>
+          <polygon points="44,10 45.9,15.6 51.7,15.6 47.1,19 48.9,24.6 44,21.1 39.1,24.6 40.9,19 36.3,15.6 42.1,15.6" fill="#52d18c"/>
+        </svg>
+        <div class="box-title" data-religion="islam">Islám</div>
+        <div class="placed-chips" id="placed-islam"></div>
+      </div>
+
+      <!-- HINDUISMUS -->
+      <div class="drop-box" data-religion="hinduism" id="box-hinduism"
+           ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+        <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+          <text x="30" y="45" text-anchor="middle"
+                font-family="'Noto Serif', 'Times New Roman', Georgia, serif"
+                font-size="44" font-weight="bold"
+                fill="#f09050">ॐ</text>
+        </svg>
+        <div class="box-title" data-religion="hinduism">Hinduismus</div>
+        <div class="placed-chips" id="placed-hinduism"></div>
+      </div>
+
+      <!-- JUDAISMUS -->
+      <div class="drop-box" data-religion="judaism" id="box-judaism"
+           ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+        <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,8 49,40 11,40"
+                   fill="#7aabf0" fill-opacity="0.18"
+                   stroke="#7aabf0" stroke-width="2.2" stroke-linejoin="round"/>
+          <polygon points="30,52 11,20 49,20"
+                   fill="#7aabf0" fill-opacity="0.18"
+                   stroke="#7aabf0" stroke-width="2.2" stroke-linejoin="round"/>
+        </svg>
+        <div class="box-title" data-religion="judaism">Judaismus</div>
+        <div class="placed-chips" id="placed-judaism"></div>
+      </div>
+
+      <!-- BUDDHISMUS -->
+      <div class="drop-box" data-religion="buddhism" id="box-buddhism"
+           ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)">
+        <svg class="box-svg-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="30" r="22" stroke="#f0d050" stroke-width="2.5" fill="none"/>
+          <circle cx="30" cy="30" r="5" stroke="#f0d050" stroke-width="2" fill="none"/>
+          <line x1="30" y1="9"   x2="30" y2="23"   stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="45" y1="15" x2="35" y2="23"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="51" y1="30" x2="37" y2="30"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="45" y1="45" x2="35" y2="37"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="30" y1="51" x2="30" y2="37"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="15" y1="45" x2="25" y2="37"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="9"  y1="30" x2="23" y2="30"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+          <line x1="15" y1="15" x2="25" y2="23"    stroke="#f0d050" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="box-title" data-religion="buddhism">Buddhismus</div>
+        <div class="placed-chips" id="placed-buddhism"></div>
+      </div>
+
+    </div>
+
+    <!-- CHIPS -->
+    <div class="chips-section">
+      <div class="chips-label" id="chips-label">— Přetáhni pojmy nahoru —</div>
+      <div class="chips-grid" id="chips-container"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-next" id="btn-next" onclick="checkRound()">✓ Potvrdit kolo</button>
+      <button class="btn btn-reset" onclick="resetGame()">↺ Znovu</button>
+    </div>
+    <div class="result-msg" id="result-msg"></div>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div class="final-screen" id="final-screen">
+    <div class="final-trophy">🏆</div>
+    <div class="final-score-wrap">
+      <div class="final-score" id="final-score">16/16</div>
+      <div class="final-label">Celkové skóre</div>
+    </div>
+    <div id="final-detail" class="final-grid"></div>
+    <div class="btn-row">
+      <button class="btn btn-next" onclick="resetGame()">↺ Hrát znovu</button>
+    </div>
+  </div>
+
+</div><!-- /game-wrapper -->
+
+<script>
+const ROUNDS = [
+  { category:'god',     icon:'🙏', title:'Kolo 1 – Bůh / Božstvo',     desc:'Přiřaď boha nebo božstvo ke správnému náboženství' },
+  { category:'book',    icon:'📖', title:'Kolo 2 – Posvátná kniha',     desc:'Přiřaď posvátný text ke správnému náboženství' },
+  { category:'symbol',  icon:'✡',  title:'Kolo 3 – Symbol',             desc:'Přiřaď náboženský symbol ke správnému náboženství' },
+  { category:'concept', icon:'💡', title:'Kolo 4 – Pojmy a tradice',    desc:'Přiřaď pojmy a tradice ke správnému náboženství' },
+];
+
+const DATA = [
+  { id:'g1', text:'Alláh',                 icon:'', religion:'islam',    category:'god' },
+  { id:'g2', text:'Višnu / Brahma / Šiva', icon:'', religion:'hinduism', category:'god' },
+  { id:'g3', text:'Jahve (JHVH)',          icon:'', religion:'judaism',   category:'god' },
+  { id:'g4', text:'Buddha (učitel)',       icon:'', religion:'buddhism', category:'god' },
+  { id:'b1', text:'Korán',                icon:'📖', religion:'islam',    category:'book' },
+  { id:'b2', text:'Védy / Bhagavadgíta',  icon:'📜', religion:'hinduism', category:'book' },
+  { id:'b3', text:'Tóra / Talmud',        icon:'📚', religion:'judaism',   category:'book' },
+  { id:'b4', text:'Tipitaka',             icon:'🗂', religion:'buddhism', category:'book' },
+  { id:'s1', text:'Půlměsíc a hvězda',    icon:'☪️', religion:'islam',    category:'symbol' },
+  { id:'s2', text:'Óm (ॐ)',               icon:'🕉️', religion:'hinduism', category:'symbol' },
+  { id:'s3', text:'Davidova hvězda',      icon:'✡️', religion:'judaism',   category:'symbol' },
+  { id:'s4', text:'Dharmacakra (kolo)',   icon:'☸️', religion:'buddhism', category:'symbol' },
+  { id:'c1', text:'Ramadán',             icon:'🌙', religion:'islam',    category:'concept', desc:'měsíc půstu a duchovní očisty' },
+  { id:'c2', text:'Karma',               icon:'⚖️', religion:'hinduism', category:'concept', desc:'princip, že každé jednání má své důsledky' },
+  { id:'c3', text:'Menora',              icon:'🕎', religion:'judaism',   category:'concept', desc:'tradiční sedmicípý svícen, připomíná zázrak světla' },
+  { id:'c4', text:'Meditace',            icon:'🧘', religion:'buddhism', category:'concept', desc:'cvičení mysli pro klid a osvícení' },
+];
+
+const RELIGIONS = ['islam','hinduism','judaism','buddhism'];
+
+let currentRound = 0;
+let placements = {};
+let allResults = {};
+let roundLocked = false;
+let dragId = null;
+let touchChip = null;
+let touchClone = null;
+
+function currentItems() {
+  return DATA.filter(d => d.category === ROUNDS[currentRound].category);
+}
+
+function startRound() {
+  roundLocked = false;
+  placements = {};
+  const r = ROUNDS[currentRound];
+
+  document.getElementById('round-icon').textContent = r.icon;
+  document.getElementById('round-title').textContent = r.title;
+  document.getElementById('round-desc').textContent  = r.desc;
+  document.getElementById('btn-next').textContent = currentRound < ROUNDS.length - 1 ? '✓ Potvrdit kolo' : '✓ Dokončit';
+
+  ROUNDS.forEach((_, i) => {
+    const el = document.getElementById('step-' + i);
+    el.classList.remove('active','done');
+    if (i < currentRound)  el.classList.add('done');
+    if (i === currentRound) el.classList.add('active');
+    if (i < ROUNDS.length - 1) {
+      const line = document.getElementById('line-' + i);
+      line.classList.toggle('done', i < currentRound);
+    }
+  });
+
+  renderBoxes();
+  renderChips();
+  clearResult();
+
+  const banner = document.getElementById('round-banner');
+  banner.classList.remove('slidein');
+  void banner.offsetWidth;
+  banner.classList.add('slidein');
+}
+
+function renderBoxes() {
+  RELIGIONS.forEach(rel => {
+    const container = document.getElementById('placed-' + rel);
+    container.innerHTML = '';
+    DATA.filter(d => allResults[d.id] !== undefined && d.religion === rel).forEach(item => {
+      const badge = document.createElement('div');
+      badge.className = 'summary-badge ' + (allResults[item.id] ? 'ok' : 'fail');
+      badge.innerHTML = item.icon + ' ' + item.text.split('/')[0].trim();
+      container.appendChild(badge);
+    });
+  });
+}
+
+function renderChips() {
+  const container = document.getElementById('chips-container');
+  container.innerHTML = '';
+  const items = currentItems().filter(d => !placements[d.id]);
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'chip';
+    div.id = 'chip-' + item.id;
+    div.draggable = true;
+    div.dataset.id = item.id;
+    div.innerHTML = `${item.icon ? `<span class="chip-icon">${item.icon}</span>` : ''}<span class="chip-text">${item.text}${item.desc ? `<span class="chip-desc">${item.desc}</span>` : ''}</span>`;
+    div.addEventListener('dragstart', () => { dragId = item.id; div.classList.add('dragging'); });
+    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    div.addEventListener('touchstart', touchStart, { passive: false });
+    container.appendChild(div);
+  });
+  RELIGIONS.forEach(rel => {
+    const con = document.getElementById('placed-' + rel);
+    [...con.querySelectorAll('.placed-chip')].forEach(e => e.remove());
+    currentItems().filter(d => placements[d.id] === rel).forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'placed-chip';
+      el.dataset.category = item.category;
+      el.innerHTML = `${item.icon} ${item.text} ✕`;
+      if (!roundLocked) el.addEventListener('click', () => removePlaced(item.id));
+      con.appendChild(el);
+    });
+  });
+}
+
+function removePlaced(id) {
+  if (roundLocked) return;
+  delete placements[id];
+  renderChips();
+  clearResult();
+}
+
+function dragOver(e)  { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dropChip(e) {
+  e.preventDefault();
+  if (roundLocked) return;
+  const box = e.currentTarget;
+  box.classList.remove('drag-over');
+  if (!dragId) return;
+  const existing = currentItems().find(d => placements[d.id] === box.dataset.religion);
+  if (existing) delete placements[existing.id];
+  placements[dragId] = box.dataset.religion;
+  dragId = null;
+  renderChips();
+  clearResult();
+}
+
+function touchStart(e) {
+  e.preventDefault();
+  const chip = e.currentTarget;
+  touchChip = chip;
+  const rect = chip.getBoundingClientRect();
+  touchClone = chip.cloneNode(true);
+  touchClone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;z-index:9000;pointer-events:none;opacity:0.9;transform:scale(1.08);transition:none;`;
+  document.body.appendChild(touchClone);
+  chip.style.opacity = '0.2';
+  document.addEventListener('touchmove', touchMove, { passive: false });
+  document.addEventListener('touchend', touchEnd);
+}
+function touchMove(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  if (touchClone) { touchClone.style.left = (t.clientX - 55) + 'px'; touchClone.style.top = (t.clientY - 22) + 'px'; }
+  document.querySelectorAll('.drop-box').forEach(b => b.classList.remove('drag-over'));
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const box = el && el.closest('.drop-box');
+  if (box) box.classList.add('drag-over');
+}
+function touchEnd(e) {
+  document.removeEventListener('touchmove', touchMove);
+  document.removeEventListener('touchend', touchEnd);
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  if (touchChip) touchChip.style.opacity = '';
+  if (roundLocked) { touchChip = null; return; }
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const box = el && el.closest('.drop-box');
+  document.querySelectorAll('.drop-box').forEach(b => b.classList.remove('drag-over'));
+  if (box && touchChip) {
+    const id = touchChip.dataset.id;
+    const existing = currentItems().find(d => placements[d.id] === box.dataset.religion);
+    if (existing) delete placements[existing.id];
+    placements[id] = box.dataset.religion;
+    renderChips();
+    clearResult();
+  }
+  touchChip = null;
+}
+
+function checkRound() {
+  const items = currentItems();
+  const placed = items.filter(d => placements[d.id]);
+  if (placed.length < items.length) {
+    const msg = document.getElementById('result-msg');
+    msg.textContent = `Přiřaď všechny ${items.length} pojmy před potvrzením!`;
+    msg.className = 'result-msg bad';
+    return;
+  }
+  roundLocked = true;
+  let correct = 0;
+  items.forEach(item => {
+    const ok = placements[item.id] === item.religion;
+    allResults[item.id] = ok;
+    if (ok) correct++;
+    const box2 = document.getElementById('box-' + placements[item.id]);
+    box2.classList.add(ok ? 'correct' : 'wrong');
+    setTimeout(() => { box2.classList.remove('correct','wrong'); }, 1200);
+  });
+  const msg = document.getElementById('result-msg');
+  if (correct === items.length) {
+    msg.textContent = `✓ Výborně! Všechny ${correct} správně!`;
+    msg.className = 'result-msg good';
+  } else {
+    msg.textContent = `${correct} z ${items.length} správně`;
+    msg.className = 'result-msg bad';
+  }
+  setTimeout(() => {
+    const btn = document.getElementById('btn-next');
+    if (currentRound < ROUNDS.length - 1) {
+      btn.textContent = '→ Další kolo';
+      btn.onclick = nextRound;
+    } else {
+      btn.textContent = '🏁 Zobrazit výsledky';
+      btn.onclick = showFinal;
+    }
+  }, 400);
+}
+
+function nextRound() {
+  currentRound++;
+  document.getElementById('btn-next').onclick = checkRound;
+  startRound();
+}
+
+function showFinal() {
+  document.getElementById('game-area').style.display = 'none';
+  const fs = document.getElementById('final-screen');
+  fs.classList.add('visible');
+  const total = DATA.length;
+  const correct = Object.values(allResults).filter(Boolean).length;
+  document.getElementById('final-score').textContent = correct + '/' + total;
+
+  const grid = document.getElementById('final-detail');
+  grid.innerHTML = '';
+  RELIGIONS.forEach(rel => {
+    const card = document.createElement('div');
+    card.className = 'final-card';
+    card.dataset.religion = rel;
+    const relName = { islam:'Islám', hinduism:'Hinduismus', judaism:'Judaismus', buddhism:'Buddhismus' }[rel];
+    card.innerHTML = `<div class="final-card-title" data-religion="${rel}">${relName}</div>`;
+    DATA.filter(d => d.religion === rel).forEach(item => {
+      const ok = allResults[item.id];
+      const row = document.createElement('div');
+      row.className = 'final-item';
+      row.innerHTML = `<span class="${ok ? 'ok' : 'fail'}">${ok ? '✓' : '✗'}</span> ${item.icon} ${item.text}`;
+      card.appendChild(row);
+    });
+    grid.appendChild(card);
+  });
+  if (correct === total) confetti();
+}
+
+function clearResult() {
+  const msg = document.getElementById('result-msg');
+  msg.textContent = '';
+  msg.className = 'result-msg';
+}
+
+function resetGame() {
+  currentRound = 0;
+  placements = {};
+  allResults = {};
+  roundLocked = false;
+  document.getElementById('game-area').style.display = '';
+  document.getElementById('final-screen').classList.remove('visible');
+  document.getElementById('btn-next').onclick = checkRound;
+  startRound();
+}
+
+function confetti() {
+  const colors = ['#c9a84c','#52d18c','#f09050','#7aabf0','#f0d050','#e06060'];
+  const shapes = ['2px', '50%', '0'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      const size = 7 + Math.random() * 6;
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-12px';
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)];
+      el.style.animationDuration = (1.5 + Math.random() * 1) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }, i * 22);
+  }
+}
+
+startRound();
+</script>
+</body>
+</html>
